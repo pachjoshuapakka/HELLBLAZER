@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Escáner QR - Fiesta</title>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; }
+    #result { margin-top: 1rem; font-weight: bold; }
+    .ok { color: green; }
+    .err { color: red; }
+  </style>
+</head>
+<body>
+  <h2>Escanear Entrada</h2>
+  <div id="reader" style="width: 400px;"></div>
+  <div id="result">Esperando escaneo...</div>
+
+  <script>
+    const serverScanEndpoint = "/scan";
+
+    function show(msg, ok=true) {
+      const el = document.getElementById("result");
+      el.textContent = msg;
+      el.className = ok ? "ok" : "err";
+    }
+
+    function onScanSuccess(decodedText) {
+      if (window._sending) return;
+      window._sending = true;
+      show("Enviando código al servidor...");
+
+      fetch(serverScanEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: decodedText })
+      })
+      .then(r => r.json().then(j => ({ status: r.status, body: j })))
+      .then(resp => {
+        if (resp.status === 200 && resp.body.ok) {
+          show("Entrada válida — ¡Bienvenido!", true);
+        } else if (resp.status === 409) {
+          show("Código ya fue usado (re-escaneado).", false);
+        } else if (resp.status === 404) {
+          show("Código no encontrado.", false);
+        } else {
+          show("Error: " + (resp.body.error || "desconocido"), false);
+        }
+        try { navigator.vibrate && navigator.vibrate(200); } catch(e){}
+      })
+      .catch(err => {
+        console.error(err);
+        show("Error al conectar con el servidor.", false);
+      })
+      .finally(() => {
+        setTimeout(() => { window._sending = false; show("Listo para siguiente."); }, 1200);
+      });
+    }
+
+    function onScanFailure(error) {
+      // fallas normales de lectura; se ignoran
+    }
+
+    const html5Qrcode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: 250 };
+
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        const cameraId = devices[0].id;
+        html5Qrcode.start(cameraId, config, onScanSuccess, onScanFailure)
+        .catch(err => show("No se pudo iniciar la cámara: " + err, false));
+      } else {
+        show("No se encontró cámara.", false);
+      }
+    }).catch(err => show("Error al pedir cámaras: " + err, false));
+  </script>
+</body>
+</html>

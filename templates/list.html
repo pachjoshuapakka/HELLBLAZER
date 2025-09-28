@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registros - HELLBLAZER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin:0; min-height:100vh;
+      font-family:'Orbitron',sans-serif; color:#fff;
+      background:#000; padding:1rem;
+      padding-top:70px; padding-bottom:60px;
+    }
+    header,footer{width:100%; position:fixed; left:0; z-index:1000;}
+    header{top:0; background:#000; border-bottom:2px solid #fff; text-align:center; padding:0.6rem;}
+    header h1{margin:0;font-size:1.8rem;text-shadow:0 0 20px #fff;}
+    footer{bottom:0;background:#000;border-top:2px solid #fff;text-align:center;padding:0.6rem;}
+    footer p{margin:0;text-shadow:0 0 10px #fff;}
+    h2{font-size:2rem;text-align:center;margin-bottom:1rem;text-shadow:0 0 20px #fff;}
+    .wrap{width:100%;max-width:95vw;margin:auto;background:#111;border:2px solid #fff;border-radius:10px;padding:.5rem;box-shadow:0 0 20px #fff;overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.9rem;color:#fff;}
+    th,td{padding:.4rem;border-bottom:1px solid #ffffff33;text-align:center;}
+    th{background:#222;position:sticky;top:0;}
+    tr.not{background:rgba(50,50,50,.8);}
+    tr.scanned{background:#fff;color:#000;font-weight:bold;transition:all .3s ease;}
+    tr.scanned td{color:#000;}
+    .mono{font-family:monospace;font-size:.8rem;}
+    a{color:#fff;text-decoration:none;font-size:1.1rem;margin:0 0.5rem;}
+    a:hover{text-shadow:0 0 10px #fff;}
+
+    /* 🔥 Contador + barra */
+    .stats {
+      text-align:center;
+      margin:1rem auto;
+    }
+    .counter {
+      font-size:1.2rem;
+      margin-bottom:0.5rem;
+    }
+    .progress-bar {
+      width:90%; max-width:500px;
+      height:20px;
+      margin:0 auto;
+      border:2px solid #fff;
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 0 10px #fff;
+      background:#222;
+    }
+    .progress-fill {
+      height:100%;
+      width:0%;
+      background:#fff;
+      box-shadow:0 0 15px #fff;
+      transition:width 0.5s ease;
+    }
+
+    /* 🔥 Botones filtro */
+    .filters {
+      text-align:center;
+      margin:1rem auto;
+    }
+    .filters button {
+      margin:0.2rem;
+      padding:0.6rem 1rem;
+      font-family:'Orbitron',sans-serif;
+      font-size:1rem;
+      border:2px solid #fff;
+      border-radius:8px;
+      background:#000;
+      color:#fff;
+      cursor:pointer;
+      transition:all 0.3s ease;
+    }
+    .filters button:hover {
+      background:#fff;
+      color:#000;
+      box-shadow:0 0 10px #fff;
+    }
+  </style>
+</head>
+<body>
+  <header><h1>HELLBLAZER</h1></header>
+
+  <div class="wrap">
+    <h2>📋 Registros</h2>
+
+    <!-- 🔥 Contador + barra -->
+    <div class="stats">
+      <div class="counter">
+        ✅ <span id="scanned-count">0</span> de <span id="total-count">0</span> entradas validadas
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- 🔥 Botones de filtro -->
+    <div class="filters">
+      <button onclick="filterRows('all')">Mostrar todos</button>
+      <button onclick="filterRows('scanned')">✅ Solo validados</button>
+      <button onclick="filterRows('not')">⏳ Solo pendientes</button>
+    </div>
+
+    <table id="tickets-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Código</th>
+          <th>Creado</th>
+          <th>Escaneado</th>
+          <th>Escaneado en</th>
+          <th>Validación</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr class="{{ 'scanned' if t.scanned else 'not' }}">
+          <td>{{ t.id }}</td>
+          <td class="mono">{{ t.code }}</td>
+          <td>{{ t.created_at }}</td>
+          <td>{{ 'Sí' if t.scanned else 'No' }}</td>
+          <td>{{ t.scanned_at or '-' }}</td>
+          <td>{% if t.scanned %}✅ Entrada validada{% else %}⏳ Pendiente{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p style="text-align:center; margin-top:1rem;">
+      <a href="/">⬅️ Inicio</a>
+      <a href="/scan-page">📷 Ir a escanear</a>
+    </p>
+  </div>
+
+  <footer><p>VOL. III – 03/10/25</p></footer>
+
+  <script>
+    // ✅ Contador y barra
+    function updateStats() {
+      const rows=document.querySelectorAll("#tickets-table tbody tr");
+      let total=rows.length;
+      let scanned=0;
+      rows.forEach(r=>{ if(r.classList.contains("scanned")) scanned++; });
+      document.getElementById("total-count").textContent=total;
+      document.getElementById("scanned-count").textContent=scanned;
+      document.getElementById("progress-fill").style.width=(total>0?(scanned/total*100):0)+"%";
+    }
+    updateStats();
+
+    // ✅ Filtros
+    function filterRows(type) {
+      const rows=document.querySelectorAll("#tickets-table tbody tr");
+      rows.forEach(r=>{
+        if(type==="all") {
+          r.style.display="";
+        } else if(type==="scanned") {
+          r.style.display = r.classList.contains("scanned") ? "" : "none";
+        } else if(type==="not") {
+          r.style.display = r.classList.contains("not") ? "" : "none";
+        }
+      });
+      updateStats();
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

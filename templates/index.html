@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HELLBLAZER - Control de Entradas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin:0; min-height:100vh;
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      background: linear-gradient(45deg, #000, #111, #fff);
+      background-size: 400% 400%;
+      animation: wave 15s ease infinite;
+      font-family:'Orbitron',sans-serif; color:#fff; text-align:center;
+    }
+    @keyframes wave {
+      0% { background-position:0% 50%; }
+      50% { background-position:100% 50%; }
+      100% { background-position:0% 50%; }
+    }
+    .glitch {
+      position: relative;
+      font-size: 3rem;
+      text-shadow:0 0 10px #fff,0 0 20px #fff;
+    }
+    .glitch::before, .glitch::after {
+      content: "HELLBLAZER";
+      position: absolute;
+      left: 0;
+    }
+    .glitch::before {
+      animation: glitch 2s infinite;
+      color: #fff;
+    }
+    .glitch::after {
+      animation: glitch 2s infinite reverse;
+      color: #999;
+    }
+    @keyframes glitch {
+      0% { clip: rect(10px, 9999px, 40px, 0); transform: translate(-3px); }
+      20% { clip: rect(50px, 9999px, 80px, 0); transform: translate(3px); }
+      40% { clip: rect(20px, 9999px, 60px, 0); transform: translate(-2px); }
+      100% { clip: rect(0, 9999px, 100px, 0); transform: translate(0); }
+    }
+    .btn {
+      display:inline-block; margin:1rem; padding:1rem 2rem;
+      font-size:1.3rem; border:2px solid #fff; border-radius:12px;
+      color:#fff; background:rgba(0,0,0,0.6); cursor:pointer;
+      text-decoration:none; position:relative; overflow:hidden;
+    }
+    .btn::before {
+      content:""; position:absolute; top:0; left:-100%;
+      width:100%; height:100%; border:2px solid #fff;
+      animation: borderMove 3s linear infinite;
+    }
+    @keyframes borderMove {
+      0% { left:-100%; }
+      100% { left:100%; }
+    }
+    .btn:hover { background:#fff; color:#000; box-shadow:0 0 20px #fff; }
+    footer {
+      position:fixed; bottom:0; left:0; width:100%;
+      text-align:center; padding:.6rem; border-top:2px solid #fff;
+      font-size:1rem; color:#fff; text-shadow:0 0 10px #fff;
+      background:rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <h1 class="glitch">HELLBLAZER</h1>
+  <a href="/scan-page" class="btn">📷 Escanear Preventa</a>
+  <a href="/list" class="btn">📋 Ver Registros</a>
+  <footer>VOL. III – 03/10/25</footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

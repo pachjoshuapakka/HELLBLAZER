@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Lista de tickets</title>
+<style>
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #ccc; padding: 6px; }
+  .scanned { background: #e0ffe0; }
+  .not { background: #ffe0e0; }
+</style>
+</head>
+<body>
+  <h2>Lista de tickets</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Código</th><th>Creado</th><th>Escaneado</th><th>Escaneado At</th></tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr class="{{ 'scanned' if t.scanned else 'not' }}">
+        <td>{{ t.id }}</td>
+        <td style="font-family:monospace; font-size:0.9em;">{{ t.code }}</td>
+        <td>{{ t.created_at }}</td>
+        <td>{{ 'Sí' if t.scanned else 'No' }}</td>
+        <td>{{ t.scanned_at or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
